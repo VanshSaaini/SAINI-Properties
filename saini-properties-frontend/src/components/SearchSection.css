@@ -1,0 +1,126 @@
+.search-section-wrapper {
+  position: relative;
+  z-index: 10;
+  margin-top: -60px;
+  padding: 0 1rem;
+}
+
+.search-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.search-header-info {
+  margin-bottom: 1.5rem;
+}
+
+.search-header-info h3 {
+  font-size: 1.2rem;
+  color: #1f2937;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.search-header-info p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.search-bar-form {
+  display: grid;
+  grid-template-columns: 1.8fr 1.2fr 1.2fr 1fr;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.input-group input, .input-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  background-color: #f9fafb;
+  color: #1f2937;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus, .input-group select:focus {
+  border-color: var(--primary-color, #2563eb);
+}
+
+/* Explicit layout styling for the single site constraint */
+.input-group .disabled-location-input {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #4b5563;
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+.search-submit-btn {
+  width: 100%;
+  background: var(--primary-color, #2563eb);
+  color: white;
+  border: none;
+  padding: 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.search-submit-btn:hover {
+  background: var(--secondary-color, #1e3a8a);
+}
+
+/* Data Metric Display Panel */
+.area-result-badge {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(37, 99, 235, 0.05);
+  border-left: 4px solid var(--primary-color, #2563eb);
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-title {
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.badge-value {
+  font-size: 1.1rem;
+  color: var(--primary-color, #2563eb);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .search-bar-form {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .search-section-wrapper {
+    margin-top: -30px;
+  }
+}
