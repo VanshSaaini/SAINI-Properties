@@ -12,27 +12,25 @@ export default function Login() {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    try {
-      // 1. Fixed: Pass 'credentials' to the 'login' function
-      const response = await login(credentials); 
-      
-      // If you return a token or user data from backend, handle it here (e.g., localStorage)
-      // localStorage.setItem("token", response.data.token);
-      
-      alert("Login Successful!");
-      navigate("/dashboard"); // 2. Fixed: Redirect to dashboard/home, not back to login
-    } catch (err) {
-      // Safely grab error messages from Spring Boot without crashing React
-      if (err.response?.data && typeof err.response.data === "object") {
-        setError(err.response.data.message || err.response.data.error || "Login failed.");
-      } else {
-        setError(err.response?.data || "An error occurred during login.");
-      }
+ async function handleSubmit(e) {
+  e.preventDefault();
+  setError("");
+  try {
+    const response = await login(credentials); 
+    
+    // SAVE THE LOGIN FLAG OR TOKEN HERE
+    localStorage.setItem("token", JSON.stringify(response.data)); 
+    
+    alert("Login Successful!");
+    navigate("/dashboard"); // or your properties page
+  } catch (err) {
+    if (err.response?.data && typeof err.response.data === "object") {
+      setError(err.response.data.message || err.response.data.error || "Login failed.");
+    } else {
+      setError(err.response?.data || "An error occurred during login.");
     }
   }
+}
 
   return (
     <div className="auth-page-wrapper">

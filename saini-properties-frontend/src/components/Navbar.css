@@ -29,9 +29,11 @@
 }
 
 .navbar-logo h2 {
+  font-family: var(--font-display);
   font-size: 1.5rem;
   color: var(--text-dark);
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .navbar-logo span {

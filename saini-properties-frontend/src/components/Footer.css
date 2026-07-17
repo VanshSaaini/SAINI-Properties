@@ -18,9 +18,10 @@
 
 /* Brand Column */
 .footer-logo h2 {
+  font-family: var(--font-display);
   font-size: 1.6rem;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 1rem;
 }
 

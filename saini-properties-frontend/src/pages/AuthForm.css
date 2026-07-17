@@ -23,14 +23,16 @@
 }
 
 .auth-header h2 {
+  font-family: var(--font-display);
   font-size: 2rem;
-  color: #1f2937;
-  font-weight: 800;
+  color: var(--color-ink);
+  font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
 .auth-header h2 span {
-  color: #2563eb;
+  font-style: italic;
+  color: var(--color-primary);
 }
 
 .auth-header p {
@@ -111,4 +113,15 @@
 .auth-link:hover {
   color: #1e3a8a;
   text-decoration: underline;
+}
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--radius-md);
+  }
+
+  .auth-header h2 {
+    font-size: 1.6rem;
+  }
 }

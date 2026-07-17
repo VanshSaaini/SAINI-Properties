@@ -38,11 +38,11 @@ export default function Footer() {
             </li>
             <li>
               <span className="contact-icon">📞</span> 
-              +1 (555) 019-2834
+              +91 93891 46371 / 95362 36577
             </li>
             <li>
               <span className="contact-icon">✉️</span> 
-              info@sainiproperties.com
+              vs7579030670@gmail.com
             </li>
           </ul>
         </div>

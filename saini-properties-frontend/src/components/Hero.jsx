@@ -1,30 +1,39 @@
 import React from 'react';
 import './Hero.css';
 
-const Hero = () => {
+const stats = [
+  { value: '120+', label: 'Properties Listed' },
+  { value: '850+', label: 'Families Housed' },
+  { value: '15 yrs', label: 'On the Ground' },
+];
+
+export default function Hero() {
   return (
-    <div className="hero-container" id="home">
+    <header className="hero-banner">
       <div className="hero-overlay"></div>
-      <div className="hero-content">
-        <h1>Find Your Dream Home Today</h1>
-        <p>Discover the most exclusive properties in prime locations. Discover seamless buying, renting, and investing experiences tailored just for you.</p>
+      <div className="hero-content fade-in-up">
+        <span className="hero-eyebrow">Saini Properties</span>
+        <h1>Discover premium spaces built with <span>precision</span></h1>
+        <p>Premium architectural configurations constructed around structural honesty, strategic locations, and verified layouts.</p>
+        <div className="hero-cta-group">
+          <button
+            className="hero-btn-primary"
+            onClick={() => document.querySelector('.search-section')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            View Configurations
+          </button>
+          <button className="hero-btn-secondary">Learn More</button>
+        </div>
+
         <div className="hero-stats">
-          <div className="stat-item">
-            <h3>12k+</h3>
-            <p>Premium Properties</p>
-          </div>
-          <div className="stat-item">
-            <h3>5k+</h3>
-            <p>Happy Customers</p>
-          </div>
-          <div className="stat-item">
-            <h3>150+</h3>
-            <p>Awards Won</p>
-          </div>
+          {stats.map((stat) => (
+            <div className="hero-stat" key={stat.label}>
+              <span className="hero-stat-value">{stat.value}</span>
+              <span className="hero-stat-label">{stat.label}</span>
+            </div>
+          ))}
         </div>
       </div>
-    </div>
+    </header>
   );
-};
-
-export default Hero;
+}

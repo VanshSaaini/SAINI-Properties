@@ -1,0 +1,113 @@
+.page-layout-wrapper {
+  padding-top: 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  flex: 1;
+  width: 90%;
+  max-width: var(--container-width);
+  margin: 3rem auto;
+}
+
+.page-content h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 1rem;
+}
+
+.page-content h1 span {
+  font-style: italic;
+  color: var(--color-primary);
+}
+
+.page-content > p {
+  color: var(--color-muted);
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin-bottom: 2.5rem;
+}
+
+.page-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.page-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.page-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.page-card-icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.page-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 0.5rem;
+}
+
+.page-card p {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.review-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+}
+
+.review-stars {
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.review-quote {
+  color: var(--color-ink);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.review-author {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+.review-author strong {
+  color: var(--color-ink);
+}
+
+.review-author span {
+  color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+  .page-content {
+    margin-top: 2rem;
+  }
+}

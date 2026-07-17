@@ -1,40 +1,71 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Basic client check for active login status flag
+  const token = localStorage.getItem("token");
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsMenuOpen(false);
+    navigate("/login");
+  };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div className="navbar-logo">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <h2>SAINI<span>Properties</span></h2>
-          </Link>
-        </div>
         
-        <div className={`navbar-links ${isOpen ? 'active' : ''}`}>
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/properties" className="nav-link">Properties</Link>
-          <Link to="/services" className="nav-link">Services</Link>
-          <Link to="/reviews" className="nav-link">Reviews</Link>
+        {/* Brand Identity Branding Logo */}
+        <div className="navbar-logo">
+          <h2>
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              SAINI<span>Properties</span>
+            </Link>
+          </h2>
+        </div>
+
+        {/* Hamburger Element for Mobile Displays */}
+        <div className="navbar-hamburger" onClick={toggleMenu}>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+        </div>
+
+        {/* Dynamic Navigation Drawer Links */}
+        <div className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
+          <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Home</Link>
+          <Link to="/properties" className="nav-link" onClick={() => setIsMenuOpen(false)}>Properties</Link>
+          <Link to="/services" className="nav-link" onClick={() => setIsMenuOpen(false)}>Services</Link>
+          <Link to="/reviews" className="nav-link" onClick={() => setIsMenuOpen(false)}>Reviews</Link>
           
-          {/* Enhanced Action Buttons Group */}
+          {/* Dynamic Authentic CTA Action Routing Block */}
           <div className="nav-auth-group">
-            <Link to="/login" className="nav-link-login">Login</Link>
-            <Link to="/register" className="nav-btn-register">Register</Link>
+            {!token ? (
+              <>
+                <Link to="/login" className="nav-link-login" onClick={() => setIsMenuOpen(false)}>
+                  Login
+                </Link>
+                <Link to="/register" className="nav-btn-register" onClick={() => setIsMenuOpen(false)}>
+                  Register
+                </Link>
+              </>
+            ) : (
+              <button className="nav-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="navbar-hamburger" onClick={() => setIsOpen(!isOpen)}>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-        </div>
       </div>
     </nav>
   );
-};
-
-export default Navbar;
+}
