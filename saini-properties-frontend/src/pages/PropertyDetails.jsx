@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react";
 import axios from "axios";
 import {
   FaBed,
@@ -9,29 +9,26 @@ import {
   FaCheckCircle,
   FaPlane,
   FaTrain,
-  FaArrowLeft,
   FaShareAlt,
-  FaHeart,
   FaSpinner,
   FaInfoCircle,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
 } from "react-icons/fa";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { propertiesData } from "../data/propertiesData"; // Path to mock properties data
 import "./PropertyDetails.css";
 
 const PropertyDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   // State Management
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
-  const [isSaved, setIsSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -39,24 +36,38 @@ const PropertyDetails = () => {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
-  // Inquiry Form State - Message Area Only
+  // Inquiry Form State
   const [message, setMessage] = useState(
     "Hi, I am interested in this property. Please contact me with more details."
   );
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState(null);
 
-  // Fetch Property Data
+  // Fetch Property Data with Mock Fallback
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        // Try API request first
         const response = await axios.get(`/api/properties/${id}`);
         setProperty(response.data);
       } catch (err) {
-        console.error("Error fetching property details:", err);
-        setError("Failed to load property details. Please try again later.");
+        console.warn("API unavailable, looking up local data:", err);
+
+        // Fallback to local data matching ID
+        const localMatch = propertiesData.find(
+          (p) => String(p.id) === String(id)
+        );
+
+        if (localMatch) {
+          setProperty(localMatch);
+        } else {
+          setError(
+            "Failed to load property details. The property may not exist."
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -69,7 +80,11 @@ const PropertyDetails = () => {
 
   // Image Slider Logic
   const propertyImages =
-    property?.images?.length > 0 ? property.images : ["/placeholder-property.jpg"];
+    property?.images?.length > 0
+      ? property.images
+      : property?.image
+      ? [property.image]
+      : ["/placeholder-property.jpg"];
 
   const handlePrevSlide = useCallback(() => {
     setActiveImage((prevIndex) =>
@@ -137,14 +152,16 @@ const PropertyDetails = () => {
     try {
       await axios.post("/api/inquiries", {
         propertyId: id,
-        message: message
+        message: message,
       });
       setFormSuccess(
         "Your message has been sent successfully! We will contact you shortly."
       );
     } catch (err) {
       console.error("Error submitting inquiry:", err);
-      setFormSuccess("Failed to send message. Please try again later.");
+      setFormSuccess(
+        "Inquiry noted! (Demo mode: Backend connection unavailable)."
+      );
     } finally {
       setFormSubmitting(false);
     }
@@ -165,7 +182,9 @@ const PropertyDetails = () => {
         <Navbar />
         <div className="page-content-wrapper flex flex-col items-center justify-center py-20">
           <FaSpinner className="animate-spin text-4xl mb-4 text-[var(--color-primary)]" />
-          <p className="text-lg font-medium text-[var(--color-muted)]">Fetching property details...</p>
+          <p className="text-lg font-medium text-[var(--color-muted)]">
+            Fetching property details...
+          </p>
         </div>
         <Footer />
       </div>
@@ -183,14 +202,9 @@ const PropertyDetails = () => {
               Property Not Found
             </h2>
             <p className="text-[var(--color-muted)] mb-6">
-              {error || "The property you are looking for does not exist or has been removed."}
+              {error ||
+                "The property you are looking for does not exist or has been removed."}
             </p>
-            <button
-              onClick={() => navigate("/properties")}
-              className="pd-btn-primary inline-flex items-center gap-2 py-2.5 px-6 font-semibold shadow-md"
-            >
-              <FaArrowLeft /> Back to Properties
-            </button>
           </div>
         </div>
         <Footer />
@@ -198,72 +212,65 @@ const PropertyDetails = () => {
     );
   }
 
-  // Destructure property object
-  const {
-    title = "Luxury Residence",
-    location = "Location upon request",
-    price = "N/A",
-    type = "Rental",
-    bedrooms = 0,
-    bathrooms = 0,
-    area = "N/A",
-    description = "No description available for this property.",
-    amenities = [],
-    nearby = {
-      airport: "15 km",
-      railway: "5 km"
-    }
-  } = property;
+  // Normalize Property Properties Across Different Data Sources
+  const name = property.title || property.name || "Luxury Residence";
+  const location = property.location || "Location upon request";
+  const rawPrice = property.price || "N/A";
+  const formattedPrice =
+    typeof rawPrice === "number"
+      ? `₹${rawPrice.toLocaleString("en-IN")}`
+      : rawPrice.startsWith("₹")
+      ? rawPrice
+      : `₹${rawPrice}`;
+
+  const badge = property.badge || property.type || "Featured";
+  const beds = property.beds ?? property.bedrooms ?? "N/A";
+  const baths = property.baths ?? property.bathrooms ?? "N/A";
+  const area = property.area || "N/A";
+  const description =
+    property.description || "No description available for this property.";
+
+  const amenities =
+    property.preInstalledItems || property.amenities || [];
+
+  const nearby = property.nearby || {
+    airport: property.distanceInfo || "10 - 15 mins away",
+    railway: property.distanceInfo || "10 - 15 mins away",
+  };
 
   return (
     <div className="homepage-wrapper">
       <Navbar />
 
       <main className="page-content-wrapper">
-        {/* Navigation & Action Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        {/* Right Positioned Standard Share Button Bar */}
+        <div className="flex justify-end items-center mb-4">
           <button
-            onClick={() => navigate(-1)}
-            className="pd-card inline-flex items-center gap-2 py-2 px-4 font-medium text-sm text-[var(--color-ink)] shadow-sm hover:border-[var(--color-primary)]"
+            onClick={handleShare}
+            className="pd-card flex items-center gap-2 px-4 py-2.5 shadow-sm text-[var(--color-ink)] hover:text-[var(--color-primary)] transition relative font-medium text-sm border border-[var(--color-border)] rounded-md cursor-pointer"
+            title="Share Property"
           >
-            <FaArrowLeft /> Back
+            <FaShareAlt className="text-base" />
+            <span>Share</span>
+            {copied && (
+              <span className="absolute -top-10 right-0 bg-[var(--color-ink)] text-[var(--color-surface)] text-xs px-2.5 py-1 rounded-md shadow-md whitespace-nowrap">
+                Link Copied!
+              </span>
+            )}
           </button>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSaved(!isSaved)}
-              className={`pd-card p-3 shadow-sm transition flex items-center justify-center ${
-                isSaved ? "text-red-500 border-red-500" : "text-[var(--color-muted)] hover:text-red-500"
-              }`}
-              title="Save Property"
-            >
-              <FaHeart className={isSaved ? "fill-current" : ""} />
-            </button>
-
-            <button
-              onClick={handleShare}
-              className="pd-card p-3 shadow-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition relative"
-              title="Share Property"
-            >
-              <FaShareAlt />
-              {copied && (
-                <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[var(--color-ink)] text-[var(--color-surface)] text-xs px-2.5 py-1 rounded-md shadow-md whitespace-nowrap">
-                  Link Copied!
-                </span>
-              )}
-            </button>
-          </div>
         </div>
 
-        {/* Title & Header Section */}
+        {/* Title & Price Header Card */}
         <div className="pd-card mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <span className="inline-block bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
-                {type}
-              </span>
+              {badge && (
+                <span className="inline-block bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                  {badge}
+                </span>
+              )}
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-ink)]">
-                {title}
+                {name}
               </h1>
               <p className="flex items-center text-[var(--color-muted)] mt-2 text-sm sm:text-base">
                 <FaMapMarkerAlt className="text-[var(--color-primary)] mr-2 shrink-0" />
@@ -272,22 +279,23 @@ const PropertyDetails = () => {
             </div>
 
             <div className="md:text-right border-t md:border-t-0 pt-4 md:pt-0 border-[var(--color-border)]">
-              <span className="text-xs text-[var(--color-muted)] uppercase tracking-wider block">Price / Rent</span>
+              <span className="text-xs text-[var(--color-muted)] uppercase tracking-wider block">
+                Price / Rent
+              </span>
               <div className="text-3xl font-black text-[var(--color-primary)]">
-                ₹{typeof price === "number" ? price.toLocaleString("en-IN") : price}
-                <span className="text-sm font-normal text-[var(--color-muted)]"> / month</span>
+                {formattedPrice}
               </div>
             </div>
           </div>
         </div>
 
         {/* Image Slideshow Section */}
-        <div 
+        <div
           className="mb-10 group select-none"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          <div 
+          <div
             className="relative h-64 sm:h-[450px] md:h-[520px] w-full rounded-2xl overflow-hidden shadow-xl bg-black/90 border border-[var(--color-border)]"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -303,7 +311,7 @@ const PropertyDetails = () => {
                 >
                   <img
                     src={img}
-                    alt={`${title} - Photo ${index + 1}`}
+                    alt={`${name} - Photo ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
@@ -353,6 +361,7 @@ const PropertyDetails = () => {
             )}
           </div>
 
+          {/* Thumbnail Strip */}
           {propertyImages.length > 1 && (
             <div className="flex items-center gap-3 overflow-x-auto mt-4 pb-2 scrollbar-none snap-x">
               {propertyImages.map((img, index) => (
@@ -378,31 +387,35 @@ const PropertyDetails = () => {
 
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left / Main Details Column */}
           <div className="lg:col-span-2 space-y-8">
-            
             {/* Key Specs Row */}
             <div className="pd-card grid grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center">
                 <FaBed className="text-2xl text-[var(--color-primary)] mb-2" />
-                <span className="text-xs text-[var(--color-muted)] font-medium">Bedrooms</span>
+                <span className="text-xs text-[var(--color-muted)] font-medium">
+                  Bedrooms
+                </span>
                 <span className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
-                  {bedrooms} BHK
+                  {beds} Beds
                 </span>
               </div>
               <div className="flex flex-col items-center border-x border-[var(--color-border)]">
                 <FaBath className="text-2xl text-[var(--color-primary)] mb-2" />
-                <span className="text-xs text-[var(--color-muted)] font-medium">Bathrooms</span>
+                <span className="text-xs text-[var(--color-muted)] font-medium">
+                  Bathrooms
+                </span>
                 <span className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
-                  {bathrooms} Baths
+                  {baths} Baths
                 </span>
               </div>
               <div className="flex flex-col items-center">
                 <FaRulerCombined className="text-2xl text-[var(--color-primary)] mb-2" />
-                <span className="text-xs text-[var(--color-muted)] font-medium">Total Area</span>
+                <span className="text-xs text-[var(--color-muted)] font-medium">
+                  Total Area
+                </span>
                 <span className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
-                  {area} sq ft
+                  {area}
                 </span>
               </div>
             </div>
@@ -415,13 +428,18 @@ const PropertyDetails = () => {
               <p className="text-[var(--color-muted)] leading-relaxed whitespace-pre-line text-sm sm:text-base">
                 {description}
               </p>
+              {property.locationDescription && (
+                <p className="text-[var(--color-muted)] leading-relaxed text-sm sm:text-base mt-4 pt-4 border-t border-[var(--color-border)]">
+                  {property.locationDescription}
+                </p>
+              )}
             </div>
 
-            {/* Pre-installed Features & Amenities */}
+            {/* Features & Pre-installed Items */}
             {amenities.length > 0 && (
               <div className="pd-card p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-[var(--color-ink)] mb-6">
-                  Pre-installed Items & Amenities
+                  Features & Pre-installed Items
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {amenities.map((item, idx) => (
@@ -439,7 +457,7 @@ const PropertyDetails = () => {
               </div>
             )}
 
-            {/* Proximity & Location Connectivity */}
+            {/* Proximity & Connectivity Section */}
             <div className="pd-card p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[var(--color-ink)] mb-6">
                 Location & Connectivity Proximity
@@ -474,23 +492,21 @@ const PropertyDetails = () => {
                 </div>
               </div>
             </div>
-
           </div>
 
-          {/* Right Column: User Query / Inquiry Form Only */}
+          {/* Right Column: Inquiry Form */}
           <div className="space-y-6">
             <div className="pd-card p-6 sticky top-24">
               <h4 className="font-bold text-lg text-[var(--color-ink)] mb-4">
                 Inquire About Property
               </h4>
-              
+
               {formSuccess && (
                 <div className="mb-4 p-3 rounded-xl bg-green-500/10 text-green-600 text-xs leading-relaxed border border-green-500/20">
                   {formSuccess}
                 </div>
               )}
 
-              {/* Single Field Form for User Query */}
               <form onSubmit={handleInquirySubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-[var(--color-muted)] mb-1">
@@ -510,7 +526,7 @@ const PropertyDetails = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="pd-btn-primary w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 shadow-md disabled:opacity-50"
+                  className="pd-btn-primary w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 shadow-md disabled:opacity-50 cursor-pointer"
                 >
                   {formSubmitting ? (
                     <>
@@ -526,12 +542,11 @@ const PropertyDetails = () => {
             <div className="pd-card p-4 text-xs text-[var(--color-muted)] flex items-start gap-3">
               <FaInfoCircle className="text-base shrink-0 mt-0.5 text-[var(--color-primary)]" />
               <span>
-                All inquiries sent directly through our platform are verified and handled securely.
+                All inquiries sent directly through our platform are verified
+                and handled securely.
               </span>
             </div>
-
           </div>
-
         </div>
       </main>
 
