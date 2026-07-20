@@ -20,31 +20,36 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); //[cite: 36]
+        return new BCryptPasswordEncoder();
     }
 
-   @Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults()) // Active global CORS tracking framework
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() // Explicitly permit registration & login paths
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**", "/api/contact-query").permitAll()
                 .anyRequest().authenticated()
             );
-    
-    return http.build();
-}
 
-    // Configures explicit cross-origin permissions framework for Spring Security
+        return http.build();
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Allow React App
+        
+        configuration.setAllowedOrigins(List.of(
+            "https://saini-properties.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ));
+        
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

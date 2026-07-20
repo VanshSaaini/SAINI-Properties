@@ -17,6 +17,8 @@ export default function PropertyCard({ property }) {
     if (!isLoggedIn) {
       e.preventDefault();
       alert("Please register or login to explore the properties!");
+      // Save target layout page so user redirects back after login
+      localStorage.setItem("redirectTo", `/property-layout/${property?.id}`);
       navigate("/login");
     } else {
       navigate(`/property-layout/${property?.id}`);
@@ -25,7 +27,7 @@ export default function PropertyCard({ property }) {
 
   const {
     name = "Beautiful Suburban Home",
-    price = "450,000",
+    price = "45,000 / month",
     location = "Location unavailable",
     image,
     badge,
@@ -39,7 +41,7 @@ export default function PropertyCard({ property }) {
       <div className="property-card-media">
         {image && <img src={image} alt={name} loading="lazy" />}
         {badge && <span className="property-card-badge">{badge}</span>}
-        <span className="property-card-price">${price}</span>
+        <span className="property-card-price">₹{price}</span>
       </div>
 
       <div className="property-card-body">

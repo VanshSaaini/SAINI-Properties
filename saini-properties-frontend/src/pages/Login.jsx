@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../services/authService"; // Correctly imported
+import { login } from "../services/authService";
 import "./AuthForm.css";
 
 export default function Login() {
@@ -12,25 +12,38 @@ export default function Login() {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   }
 
- async function handleSubmit(e) {
-  e.preventDefault();
-  setError("");
-  try {
-    const response = await login(credentials); 
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
     
-    // SAVE THE LOGIN FLAG OR TOKEN HERE
-    localStorage.setItem("token", JSON.stringify(response.data)); 
-    
-    alert("Login Successful!");
-    navigate("/dashboard"); // or your properties page
-  } catch (err) {
-    if (err.response?.data && typeof err.response.data === "object") {
-      setError(err.response.data.message || err.response.data.error || "Login failed.");
-    } else {
-      setError(err.response?.data || "An error occurred during login.");
+    const targetRedirect = localStorage.getItem("redirectTo");
+
+    try {
+      const response = await login(credentials); 
+      localStorage.setItem("token", JSON.stringify(response.data)); 
+      alert("Login Successful!");
+
+      if (targetRedirect) {
+        localStorage.removeItem("redirectTo");
+        navigate(targetRedirect); // Redirect back to specific property layout page
+      } else {
+        navigate("/"); // Default home page redirect on standard login
+      }
+    } catch (err) {
+      // On failure, clear saved target route and redirect to home page
+      localStorage.removeItem("redirectTo");
+      
+      if (err.response?.data && typeof err.response.data === "object") {
+        setError(err.response.data.message || err.response.data.error || "Login failed.");
+      } else {
+        setError(err.response?.data || "An error occurred during login.");
+      }
+      
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     }
   }
-}
 
   return (
     <div className="auth-page-wrapper">

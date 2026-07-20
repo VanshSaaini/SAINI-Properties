@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth") //[cite: 37]
 @RequiredArgsConstructor //[cite: 37]
-@CrossOrigin(origins = "http://localhost:5173") //[cite: 37]
+@CrossOrigin(origins = "https://saini-properties.vercel.app") //[cite: 37]
 public class userAuth {
 
     private final authService authenticationService; //[cite: 37]
