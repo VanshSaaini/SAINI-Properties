@@ -44,35 +44,42 @@ const PropertyDetails = () => {
   const [formSuccess, setFormSuccess] = useState(null);
 
   // Fetch Property Data with Local Data Fallback
-  useEffect(() => {
-    const fetchPropertyDetails = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+useEffect(() => {
+  const fetchPropertyDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Try API request first
-        const response = await axios.get(`/api/properties/${id}`);
+      // 1. Try API Request
+      const response = await axios.get(`/api/properties/${id}`);
+      
+      // Ensure API response actually contains property data
+      if (response.data && (response.data.id || response.data.name || response.data.title)) {
         setProperty(response.data);
-      } catch (err) {
-        // Fallback to local propertiesData array matching ID
-        const localMatch = propertiesData.find(
-          (p) => String(p.id) === String(id)
-        );
-
-        if (localMatch) {
-          setProperty(localMatch);
-        } else {
-          setError("Failed to load property details. The property may not exist.");
-        }
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
+      
+      throw new Error("API returned empty property payload");
+    } catch (err) {
+      // 2. Fallback to local propertiesData array matching ID
+      const localMatch = propertiesData.find(
+        (p) => String(p.id) === String(id)
+      );
 
-    if (id) {
-      fetchPropertyDetails();
+      if (localMatch) {
+        setProperty(localMatch);
+      } else {
+        setError("Failed to load property details. The property may not exist.");
+      }
+    } finally {
+      setLoading(false);
     }
-  }, [id]);
+  };
+
+  if (id) {
+    fetchPropertyDetails();
+  }
+}, [id]);
 
   // Handle Images Array
   const propertyImages =
@@ -453,7 +460,7 @@ const PropertyDetails = () => {
               <h2 className="text-xl font-bold text-[var(--color-ink)] mb-6">
                 Connectivity & Distance Info
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
                   <div className="p-3 bg-[var(--color-primary)] text-white rounded-xl shadow-md">
                     <FaPlane className="text-xl" />
