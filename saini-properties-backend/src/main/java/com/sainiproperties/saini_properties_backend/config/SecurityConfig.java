@@ -42,7 +42,7 @@ public class SecurityConfig {
     
         // 1. Allowed Origins
          configuration.setAllowedOrigins(List.of(
-            "https://saini-properties-inyy-eight.vercel.app",
+            "https://saini-properties-inyy-8wraipwxh-vanshsaainis-projects.vercel.app",
             "http://localhost:5173",
             "http://localhost:3000"
         ));

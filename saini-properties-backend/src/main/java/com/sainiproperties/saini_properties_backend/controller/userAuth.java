@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/auth") //[cite: 37]
 @RequiredArgsConstructor //[cite: 37]
 @CrossOrigin(
-    origins = "https://saini-properties-inyy-eight.vercel.app", 
+    origins = "https://saini-properties-inyy-8wraipwxh-vanshsaainis-projects.vercel.app", 
     allowedHeaders = {"Authorization", "Content-Type", "bypass-tunnel-reminder"}, // 👈 ADDED HERE
     allowCredentials = "true"
 )
