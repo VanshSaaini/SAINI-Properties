@@ -23,6 +23,8 @@ import {
   FaExpand
 } from "react-icons/fa";
 
+import "./PropertyDetails.css";
+
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
