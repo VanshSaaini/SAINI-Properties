@@ -1,134 +1,463 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { propertiesData } from "../data/propertiesData";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import "./PropertyDetails.css";
+import {
+  FaBed,
+  FaBath,
+  FaRulerCombined,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaCheckCircle,
+  FaPlane,
+  FaTrain,
+  FaArrowLeft,
+  FaShareAlt,
+  FaHeart,
+  FaSpinner,
+  FaShieldAlt,
+  FaUser,
+  FaCalendarAlt,
+  FaInfoCircle
+} from "react-icons/fa";
 
-export default function PropertyDetails() {
+const PropertyDetails = () => {
   const { id } = useParams();
-  const property = propertiesData.find((item) => item.id === parseInt(id));
+  const navigate = useNavigate();
 
-  const [queryMessage, setQueryMessage] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [statusMsg, setStatusMsg] = useState("");
+  // State Management
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeImage, setActiveImage] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  if (!property) {
+  // Inquiry Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "Hi, I am interested in this property. Please contact me with more details."
+  });
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formSuccess, setFormSuccess] = useState(null);
+
+  // Fetch Property Data
+  useEffect(() => {
+    const fetchPropertyDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Updated API endpoint; fallback gracefully if endpoint varies
+        const response = await axios.get(`/api/properties/${id}`);
+        setProperty(response.data);
+      } catch (err) {
+        console.error("Error fetching property details:", err);
+        setError("Failed to load property details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPropertyDetails();
+    }
+  }, [id]);
+
+  // Handle Form Inputs
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle Contact Inquiry Submission
+  const handleInquirySubmit = async (e) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setFormSuccess(null);
+
+    try {
+      await axios.post("/api/inquiries", {
+        propertyId: id,
+        ...formData
+      });
+      setFormSuccess("Your message has been sent successfully! Our agent will contact you shortly.");
+      setFormData((prev) => ({
+        ...prev,
+        message: "Hi, I am interested in this property. Please contact me with more details."
+      }));
+    } catch (err) {
+      console.error("Error submitting inquiry:", err);
+      setFormSuccess("Failed to send message. Please try again or contact directly via phone.");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  // Share Handler
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="page-layout-wrapper">
-        <Navbar />
-        <div style={{ padding: "100px", textAlign: "center" }}>
-          <h2>Property Not Found!</h2>
-        </div>
-        <Footer />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
+        <FaSpinner className="animate-spin text-4xl text-blue-600 mb-4" />
+        <p className="text-lg font-medium">Fetching property details...</p>
       </div>
     );
   }
 
-  async function handleQuerySubmit(e) {
-    e.preventDefault();
-    setStatusMsg("Sending query...");
-
-    try {
-      // Backend service to trigger standard email to vs7579030670@gmail.com
-      await axios.post("http://localhost:8080/api/contact-query", {
-        targetEmail: "vs7579030670@gmail.com",
-        userEmail: userEmail,
-        propertyId: property.id,
-        propertyName: property.name,
-        message: queryMessage,
-      });
-
-      setStatusMsg("Your query has been sent successfully!");
-      setQueryMessage("");
-      setUserEmail("");
-    } catch (err) {
-      setStatusMsg("Failed to send query. Please try again later.");
-    }
-  }
-
-  return (
-    <div className="page-layout-wrapper">
-      <Navbar />
-
-      <div className="property-details-container">
-        <h1>{property.name}</h1>
-        <p className="location-tag">📍 {property.location}</p>
-
-        {/* 1. 5 Photos Gallery */}
-        <div className="photos-gallery">
-          {property.images?.slice(0, 5).map((imgUrl, idx) => (
-            <img key={idx} src={imgUrl} alt={`${property.name} ${idx + 1}`} />
-          ))}
-        </div>
-
-        <div className="details-grid">
-          <div className="main-info">
-            {/* 2. Description */}
-            <h3>Description</h3>
-            <p>{property.description}</p>
-
-            {/* 3. Pre-installed Items */}
-            <h3>Pre-installed Items</h3>
-            <ul>
-              {property.preInstalledItems?.map((item, index) => (
-                <li key={index}>✓ {item}</li>
-              ))}
-            </ul>
-
-            {/* 4. Location Details */}
-            <h3>Location Overview</h3>
-            <p>{property.locationDescription}</p>
-
-            {/* 5. Additional Distance Info */}
-            <div className="distance-badge">
-              🚆 ✈️ <strong>Proximity:</strong> {property.distanceInfo}
-            </div>
-          </div>
-
-          <div className="side-pricing-card">
-            {/* Price in Monthly Rent (INR) */}
-            <h3>Rent Pricing</h3>
-            <div className="price-tag">₹{property.price}</div>
-
-            {/* Booking call & email details */}
-            <div className="booking-box">
-              <h4>Book Your Visit</h4>
-              <p>For booking, call directly or email us at:</p>
-              <p>📞 <strong>+91 7579030670</strong></p>
-              <p>✉️ <strong>vs7579030670@gmail.com</strong></p>
-            </div>
-          </div>
-        </div>
-
-        {/* 6. Query Input Box before Footer */}
-        <div className="query-section">
-          <h3>Have Questions About This Property?</h3>
-          <p>Submit your query and our team will get back to you via email.</p>
-          {statusMsg && <p className="status-message">{statusMsg}</p>}
-
-          <form onSubmit={handleQuerySubmit} className="query-form">
-            <input
-              type="email"
-              placeholder="Your Email Address"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              required
-            />
-            <textarea
-              placeholder="Write your query here..."
-              value={queryMessage}
-              onChange={(e) => setQueryMessage(e.target.value)}
-              rows="4"
-              required
-            ></textarea>
-            <button type="submit">Submit Query</button>
-          </form>
+  if (error || !property) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+        <div className="text-center max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+          <FaInfoCircle className="text-5xl text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Property Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{error || "The property you are looking for does not exist or has been removed."}</p>
+          <button
+            onClick={() => navigate("/properties")}
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition duration-200 shadow-md"
+          >
+            <FaArrowLeft /> Back to Properties
+          </button>
         </div>
       </div>
+    );
+  }
 
-      <Footer />
+  // Destructure property object with fallbacks
+  const {
+    title = "Luxury Residence",
+    location = "Location upon request",
+    price = "N/A",
+    type = "Rental",
+    bedrooms = 0,
+    bathrooms = 0,
+    area = "N/A",
+    description = "No description available for this property.",
+    images = [],
+    amenities = [],
+    agent = {
+      name: "Saini Properties Representative",
+      phone: "+91 98765 43210",
+      email: "contact@sainiproperties.com"
+    },
+    nearby = {
+      airport: "15 km",
+      railway: "5 km"
+    }
+  } = property;
+
+  // Fallback photo array if backend returns empty images
+  const propertyImages = images.length > 0 ? images : ["/placeholder-property.jpg"];
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Navigation & Action Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 px-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition"
+          >
+            <FaArrowLeft /> Back
+          </button>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSaved(!isSaved)}
+              className={`p-3 rounded-xl border shadow-sm transition flex items-center justify-center ${
+                isSaved
+                  ? "bg-red-50 dark:bg-red-950/40 border-red-200 text-red-500"
+                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-red-500"
+              }`}
+              title="Save Property"
+            >
+              <FaHeart className={isSaved ? "fill-current" : ""} />
+            </button>
+            
+            <button
+              onClick={handleShare}
+              className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 transition relative"
+              title="Share Property"
+            >
+              <FaShareAlt />
+              {copied && (
+                <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap">
+                  Link Copied!
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Title & Header Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <span className="inline-block bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                {type}
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
+                {title}
+              </h1>
+              <p className="flex items-center text-gray-500 dark:text-gray-400 mt-2 text-sm sm:text-base">
+                <FaMapMarkerAlt className="text-blue-600 dark:text-blue-400 mr-2 shrink-0" />
+                {location}
+              </p>
+            </div>
+
+            <div className="md:text-right border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-700">
+              <span className="text-xs text-gray-400 uppercase tracking-wider block">Price / Rent</span>
+              <div className="text-3xl font-black text-blue-600 dark:text-blue-400">
+                ₹{typeof price === "number" ? price.toLocaleString("en-IN") : price}
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400"> / month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Image Gallery */}
+        <div className="mb-10">
+          <div className="relative h-72 sm:h-[450px] w-full rounded-2xl overflow-hidden shadow-md bg-gray-200 dark:bg-gray-700 mb-4">
+            <img
+              src={propertyImages[activeImage]}
+              alt={title}
+              className="w-full h-full object-cover transition-all duration-300"
+            />
+            <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg">
+              Photo {activeImage + 1} of {propertyImages.length}
+            </div>
+          </div>
+
+          {propertyImages.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              {propertyImages.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveImage(index)}
+                  className={`relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                    activeImage === index
+                      ? "border-blue-600 scale-95 shadow-md"
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left / Main Details Column (2 Cols) */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Key Specs Row */}
+            <div className="grid grid-cols-3 gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm text-center">
+              <div className="flex flex-col items-center">
+                <FaBed className="text-2xl text-blue-600 dark:text-blue-400 mb-2" />
+                <span className="text-sm text-gray-500 dark:text-gray-400">Bedrooms</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">{bedrooms} BHK</span>
+              </div>
+              <div className="flex flex-col items-center border-x border-gray-100 dark:border-gray-700">
+                <FaBath className="text-2xl text-blue-600 dark:text-blue-400 mb-2" />
+                <span className="text-sm text-gray-500 dark:text-gray-400">Bathrooms</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">{bathrooms} Baths</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <FaRulerCombined className="text-2xl text-blue-600 dark:text-blue-400 mb-2" />
+                <span className="text-sm text-gray-500 dark:text-gray-400">Total Area</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">{area} sq ft</span>
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Property Description</h2>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                {description}
+              </p>
+            </div>
+
+            {/* Pre-installed Features & Amenities */}
+            {amenities.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Pre-installed Items & Amenities</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {amenities.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                      <FaCheckCircle className="text-green-500 text-lg shrink-0" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Proximity & Location Connectivity */}
+            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Location & Connectivity Proximity</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-blue-50/40 dark:bg-blue-950/20">
+                  <div className="p-3 bg-blue-600 text-white rounded-xl">
+                    <FaPlane className="text-xl" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium block">Nearest Airport</span>
+                    <span className="text-base font-bold text-gray-900 dark:text-white">{nearby.airport || "N/A"}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <div className="p-3 bg-emerald-600 text-white rounded-xl">
+                    <FaTrain className="text-xl" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium block">Railway Station</span>
+                    <span className="text-base font-bold text-gray-900 dark:text-white">{nearby.railway || "N/A"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column: Contact Agent & Form (1 Col) */}
+          <div className="space-y-6">
+            
+            {/* Agent Info Box */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl border-2 border-blue-500">
+                  <FaUser />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-white">{agent.name}</h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <FaShieldAlt className="text-blue-500" /> Verified Agent
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <a
+                  href={`tel:${agent.phone}`}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition shadow-md"
+                >
+                  <FaPhoneAlt /> {agent.phone}
+                </a>
+                <a
+                  href={`mailto:${agent.email}`}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-semibold py-3 px-4 rounded-xl transition"
+                >
+                  <FaEnvelope /> Send Direct Email
+                </a>
+              </div>
+
+              <hr className="border-gray-100 dark:border-gray-700 my-6" />
+
+              {/* Instant Inquiry Form */}
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4">Inquire About Property</h4>
+              
+              {formSuccess && (
+                <div className="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs leading-relaxed border border-green-200 dark:border-green-800">
+                  {formSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleInquirySubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Your Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your full name"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Your Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="name@example.com"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+91 00000 00000"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Message</label>
+                  <textarea
+                    name="message"
+                    rows="3"
+                    required
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={formSubmitting}
+                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition shadow-md disabled:opacity-50"
+                >
+                  {formSubmitting ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Sending...
+                    </>
+                  ) : (
+                    "Submit Inquiry"
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Quick Note */}
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 flex items-start gap-3">
+              <FaInfoCircle className="text-base shrink-0 mt-0.5" />
+              <span>
+                All inquiries sent directly through Saini Properties are verified and handled securely by assigned agents.
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
     </div>
   );
-}
+};
+
+export default PropertyDetails;
