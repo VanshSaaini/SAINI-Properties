@@ -2,11 +2,12 @@
    Property Details Page Stylesheet
    ========================================================================== */
 
-/* Page Wrapper Aligned with Home Page Styles */
+/* Page Wrapper Aligned with Application Theme */
 .homepage-wrapper {
   min-height: 100vh;
   background-color: var(--bg-light, #f8fafc);
   color: var(--text-primary-light, #0f172a);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .dark .homepage-wrapper {

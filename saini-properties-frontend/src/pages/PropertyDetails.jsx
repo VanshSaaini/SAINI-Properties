@@ -294,7 +294,7 @@ const PropertyDetails = () => {
             </div>
           </div>
 
-          {/* --- RESPONSIVE IMAGE SLIDESHOW SECTION --- */}
+          {/* Image Slideshow Section */}
           <div 
             className="mb-10 group select-none"
             onMouseEnter={() => setIsAutoPlaying(false)}
@@ -306,7 +306,6 @@ const PropertyDetails = () => {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* Slide Images Container */}
               <div className="relative w-full h-full">
                 {propertyImages.map((img, index) => (
                   <div
@@ -325,7 +324,6 @@ const PropertyDetails = () => {
                 ))}
               </div>
 
-              {/* Slider Controls */}
               {propertyImages.length > 1 && (
                 <>
                   <button
@@ -346,12 +344,10 @@ const PropertyDetails = () => {
                 </>
               )}
 
-              {/* Photo Counter Badge */}
               <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-medium border border-white/10 shadow-sm flex items-center gap-1.5">
                 <span>{activeImage + 1}</span> / <span>{propertyImages.length}</span>
               </div>
 
-              {/* Navigation Indicator Dots */}
               {propertyImages.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                   {propertyImages.map((_, idx) => (
@@ -370,7 +366,6 @@ const PropertyDetails = () => {
               )}
             </div>
 
-            {/* Thumbnail Preview Bar */}
             {propertyImages.length > 1 && (
               <div className="flex items-center gap-3 overflow-x-auto mt-4 pb-2 scrollbar-none snap-x">
                 {propertyImages.map((img, index) => (
@@ -498,13 +493,15 @@ const PropertyDetails = () => {
             {/* Right Column: Contact Agent & Inquiry Form */}
             <div className="space-y-6">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm sticky top-6">
+                
+                {/* Agent Header */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl border-2 border-blue-500 shrink-0">
                     <FaUser />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-gray-900 dark:text-white">
-                      Property Agent
+                      {agent.name}
                     </h3>
                     <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
                       <FaShieldAlt className="text-blue-500" /> Verified Agent
@@ -512,6 +509,7 @@ const PropertyDetails = () => {
                   </div>
                 </div>
 
+                {/* Direct Contact Buttons */}
                 <div className="space-y-3 mb-6">
                   {agent.phone && (
                     <a
@@ -543,6 +541,7 @@ const PropertyDetails = () => {
                   </div>
                 )}
 
+                {/* Single Field Form */}
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
