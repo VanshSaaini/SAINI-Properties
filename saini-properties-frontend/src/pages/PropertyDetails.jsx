@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react";
+import { useParams } from "react-router-dom"; // Fixed import
 import axios from "axios";
 import {
   FaBed,
@@ -18,7 +18,7 @@ import {
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { propertiesData } from "../data/propertiesData"; // Path to mock properties data
+import { propertiesData } from "../data/propertiesData";
 import "./PropertyDetails.css";
 
 const PropertyDetails = () => {
