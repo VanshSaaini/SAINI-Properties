@@ -147,28 +147,33 @@ useEffect(() => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevSlide, handleNextSlide]);
 
-  // Submit Inquiry Form
-  const handleInquirySubmit = async (e) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    setFormSuccess(null);
+  import API from "../api"; // Adjust import path according to your folder structure
 
-    try {
-      await axios.post("/api/inquiries", {
-        propertyId: id,
-        message: message,
-      });
-      setFormSuccess(
-        "Your message has been sent successfully! We will contact you shortly."
-      );
-    } catch (err) {
-      setFormSuccess(
-        "Inquiry submitted! (Demo mode: Backend connection unavailable)."
-      );
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
+// Submit Inquiry Form
+const handleInquirySubmit = async (e) => {
+  e.preventDefault();
+  setFormSubmitting(true);
+  setFormSuccess(null);
+
+  try {
+    // Hits http://localhost:8080/api/inquiries
+    await API.post("/api/inquiries", {
+      propertyId: id,
+      message: message,
+    });
+    setFormSuccess(
+      "Your message has been sent successfully! We will contact you shortly."
+    );
+  } catch (err) {
+    // Graceful fallback for offline / demo mode testing
+    console.warn("Backend error or connection missing:", err);
+    setFormSuccess(
+      "Inquiry submitted! (Demo mode: Backend connection unavailable)."
+    );
+  } finally {
+    setFormSubmitting(false);
+  }
+};
 
   // Share Property Action
   const handleShare = () => {
