@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import PropertyCard from '../components/PropertyCard';
+import PropertyCard from './PropertyCard';
 import { propertiesData } from '../data/propertiesData';
 import './Properties.css';
 
