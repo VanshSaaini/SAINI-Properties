@@ -19,6 +19,7 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { propertiesData } from "../data/propertiesData";
+import API from "../api"; // Adjust import path according to your folder structure
 import "./PropertyDetails.css";
 
 const PropertyDetails = () => {
@@ -147,33 +148,31 @@ useEffect(() => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevSlide, handleNextSlide]);
 
-  import API from "../api"; // Adjust import path according to your folder structure
 
 // Submit Inquiry Form
-const handleInquirySubmit = async (e) => {
-  e.preventDefault();
-  setFormSubmitting(true);
-  setFormSuccess(null);
+  const handleInquirySubmit = async (e) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setFormSuccess(null);
 
-  try {
-    // Hits http://localhost:8080/api/inquiries
-    await API.post("/api/inquiries", {
-      propertyId: id,
-      message: message,
-    });
-    setFormSuccess(
-      "Your message has been sent successfully! We will contact you shortly."
-    );
-  } catch (err) {
-    // Graceful fallback for offline / demo mode testing
-    console.warn("Backend error or connection missing:", err);
-    setFormSuccess(
-      "Inquiry submitted! (Demo mode: Backend connection unavailable)."
-    );
-  } finally {
-    setFormSubmitting(false);
-  }
-};
+    try {
+      // Uses the API instance imported at the top of the file
+      await API.post("/api/inquiries", {
+        propertyId: id,
+        message: message,
+      });
+      setFormSuccess(
+        "Your message has been sent successfully! We will contact you shortly."
+      );
+    } catch (err) {
+      console.warn("Inquiry error or offline mode:", err);
+      setFormSuccess(
+        "Inquiry submitted! (Demo mode: Backend connection unavailable)."
+      );
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
 
   // Share Property Action
   const handleShare = () => {
