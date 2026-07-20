@@ -39,15 +39,27 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        configuration.setAllowedOrigins(List.of(
+    
+        // 1. Allowed Origins
+         configuration.setAllowedOrigins(List.of(
             "https://saini-properties-inyy-eight.vercel.app",
             "http://localhost:5173",
             "http://localhost:3000"
         ));
-        
+    
+        // 2. Allowed Methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+    
+        // 3. Allowed Headers (Must explicitly allow bypass-tunnel-reminder or use "*")
+        configuration.setAllowedHeaders(List.of(
+            "Authorization", 
+            "Content-Type", 
+            "Accept", 
+            "X-Requested-With", 
+            "bypass-tunnel-reminder" // 👈 ADD THIS HERE
+        ));
+        // OR simply: configuration.setAllowedHeaders(List.of("*"));
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
