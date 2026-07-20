@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   FaBed,
@@ -17,8 +17,9 @@ import {
   FaSpinner,
   FaShieldAlt,
   FaUser,
-  FaCalendarAlt,
-  FaInfoCircle
+  FaInfoCircle,
+  FaChevronLeft,
+  FaChevronRight
 } from "react-icons/fa";
 
 const PropertyDetails = () => {
@@ -49,7 +50,6 @@ const PropertyDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        // Updated API endpoint; fallback gracefully if endpoint varies
         const response = await axios.get(`/api/properties/${id}`);
         setProperty(response.data);
       } catch (err) {
@@ -64,6 +64,33 @@ const PropertyDetails = () => {
       fetchPropertyDetails();
     }
   }, [id]);
+
+  // Image Slider Logic
+  const propertyImages = property?.images?.length > 0 
+    ? property.images 
+    : ["/placeholder-property.jpg"];
+
+  const handlePrevSlide = useCallback(() => {
+    setActiveImage((prevIndex) =>
+      prevIndex === 0 ? propertyImages.length - 1 : prevIndex - 1
+    );
+  }, [propertyImages.length]);
+
+  const handleNextSlide = useCallback(() => {
+    setActiveImage((prevIndex) =>
+      prevIndex === propertyImages.length - 1 ? 0 : prevIndex + 1
+    );
+  }, [propertyImages.length]);
+
+  // Keyboard Navigation for Slider
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") handlePrevSlide();
+      if (e.key === "ArrowRight") handleNextSlide();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handlePrevSlide, handleNextSlide]);
 
   // Handle Form Inputs
   const handleInputChange = (e) => {
@@ -131,7 +158,7 @@ const PropertyDetails = () => {
     );
   }
 
-  // Destructure property object with fallbacks
+  // Destructure property object
   const {
     title = "Luxury Residence",
     location = "Location upon request",
@@ -141,7 +168,6 @@ const PropertyDetails = () => {
     bathrooms = 0,
     area = "N/A",
     description = "No description available for this property.",
-    images = [],
     amenities = [],
     agent = {
       name: "Saini Properties Representative",
@@ -153,9 +179,6 @@ const PropertyDetails = () => {
       railway: "5 km"
     }
   } = property;
-
-  // Fallback photo array if backend returns empty images
-  const propertyImages = images.length > 0 ? images : ["/placeholder-property.jpg"];
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8 text-gray-800 dark:text-gray-100 transition-colors duration-300">
@@ -224,29 +247,70 @@ const PropertyDetails = () => {
           </div>
         </div>
 
-        {/* Interactive Image Gallery */}
-        <div className="mb-10">
-          <div className="relative h-72 sm:h-[450px] w-full rounded-2xl overflow-hidden shadow-md bg-gray-200 dark:bg-gray-700 mb-4">
+        {/* --- IMAGE SLIDER SECTION --- */}
+        <div className="mb-10 group">
+          <div className="relative h-72 sm:h-[480px] w-full rounded-2xl overflow-hidden shadow-lg bg-gray-900">
+            {/* Active Slide Image */}
             <img
               src={propertyImages[activeImage]}
-              alt={title}
-              className="w-full h-full object-cover transition-all duration-300"
+              alt={`${title} - Photo ${activeImage + 1}`}
+              className="w-full h-full object-cover transition-all duration-500 ease-in-out"
             />
-            <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg">
-              Photo {activeImage + 1} of {propertyImages.length}
+
+            {/* Slider Navigation Arrows */}
+            {propertyImages.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevSlide}
+                  aria-label="Previous photo"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/75 text-white p-3 rounded-full backdrop-blur-sm transition duration-200 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                >
+                  <FaChevronLeft className="text-lg" />
+                </button>
+
+                <button
+                  onClick={handleNextSlide}
+                  aria-label="Next photo"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/75 text-white p-3 rounded-full backdrop-blur-sm transition duration-200 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                >
+                  <FaChevronRight className="text-lg" />
+                </button>
+              </>
+            )}
+
+            {/* Photo Counter Badge */}
+            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg font-medium">
+              {activeImage + 1} / {propertyImages.length}
             </div>
+
+            {/* Slide Navigation Dots */}
+            {propertyImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                {propertyImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImage(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      activeImage === idx ? "w-6 bg-white" : "w-2.5 bg-white/50 hover:bg-white/80"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
+          {/* Thumbnail Preview Bar */}
           {propertyImages.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+            <div className="flex items-center gap-3 overflow-x-auto mt-4 pb-2 scrollbar-thin">
               {propertyImages.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
                   className={`relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                     activeImage === index
-                      ? "border-blue-600 scale-95 shadow-md"
-                      : "border-transparent opacity-70 hover:opacity-100"
+                      ? "border-blue-600 scale-95 shadow-md ring-2 ring-blue-500/30"
+                      : "border-transparent opacity-60 hover:opacity-100"
                   }`}
                 >
                   <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
@@ -259,7 +323,7 @@ const PropertyDetails = () => {
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left / Main Details Column (2 Cols) */}
+          {/* Left / Main Details Column */}
           <div className="lg:col-span-2 space-y-8">
             
             {/* Key Specs Row */}
@@ -332,10 +396,8 @@ const PropertyDetails = () => {
 
           </div>
 
-          {/* Right Column: Contact Agent & Form (1 Col) */}
+          {/* Right Column: Contact Agent & Inquiry Form */}
           <div className="space-y-6">
-            
-            {/* Agent Info Box */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl border-2 border-blue-500">
@@ -366,7 +428,6 @@ const PropertyDetails = () => {
 
               <hr className="border-gray-100 dark:border-gray-700 my-6" />
 
-              {/* Instant Inquiry Form */}
               <h4 className="font-bold text-gray-900 dark:text-white mb-4">Inquire About Property</h4>
               
               {formSuccess && (
@@ -443,7 +504,6 @@ const PropertyDetails = () => {
               </form>
             </div>
 
-            {/* Quick Note */}
             <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 flex items-start gap-3">
               <FaInfoCircle className="text-base shrink-0 mt-0.5" />
               <span>
