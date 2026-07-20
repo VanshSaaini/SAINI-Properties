@@ -29,9 +29,13 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/api/contact-query").permitAll()
-                .anyRequest().authenticated()
-            );
+            .requestMatchers(
+    "/auth/**",
+                "/api/contact-query",
+                "/api/properties/**"
+            ).permitAll()
+            .anyRequest().authenticated()
+        );
 
         return http.build();
     }
