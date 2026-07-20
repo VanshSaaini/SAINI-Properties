@@ -41,7 +41,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         configuration.setAllowedOrigins(List.of(
-            "https://saini-properties.vercel.app",
+            "https://saini-properties-inyy-eight.vercel.app",
             "http://localhost:5173",
             "http://localhost:3000"
         ));

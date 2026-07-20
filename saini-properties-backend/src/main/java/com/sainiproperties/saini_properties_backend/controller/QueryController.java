@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "https://saini-properties.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://saini-properties-inyy-eight.vercel.app"})
 public class QueryController {
 
     @Autowired
