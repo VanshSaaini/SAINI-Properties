@@ -2,31 +2,39 @@
    Property Details Page Stylesheet
    ========================================================================== */
 
-/* Page Wrapper Aligned with Application Theme */
+/* Page Wrapper Aligned with PageLayout.css */
 .homepage-wrapper {
+  padding-top: 80px;
   min-height: 100vh;
-  background-color: var(--bg-light, #f8fafc);
-  color: var(--text-primary-light, #0f172a);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  transition: background-color var(--transition), color var(--transition);
 }
 
-.dark .homepage-wrapper {
-  background-color: var(--bg-dark, #0f172a);
-  color: var(--text-primary-dark, #f8fafc);
+.page-content-wrapper {
+  flex: 1;
+  width: 90%;
+  max-width: var(--container-width);
+  margin: 2rem auto 3rem auto;
 }
 
-/* Glassmorphism Backdrop Effects */
-.glass-overlay {
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+/* Custom Card Styling matching PageLayout page-card */
+.pd-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+/* Glassmorphism Badge Effects */
 .glass-badge {
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--color-border);
 }
 
 /* Custom Scrollbar Removal for Thumbnail Strip */
@@ -40,29 +48,33 @@
 
 /* Custom Form Input Focus Effects */
 .property-input {
-  transition: var(--transition-smooth, all 0.3s cubic-bezier(0.4, 0, 0.2, 1));
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  transition: border-color var(--transition);
 }
 
 .property-input:focus {
-  border-color: var(--primary-blue, #2563eb);
+  outline: none;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Responsive Custom Adjustments */
+/* Button Variants */
+.pd-btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition), transform var(--transition);
+}
+
+.pd-btn-primary:hover {
+  opacity: 0.92;
+}
+
+/* Responsive Slideshow Adjustments */
 @media (max-width: 640px) {
-  .slideshow-container {
-    height: 280px !important;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .slideshow-container {
-    height: 420px !important;
-  }
-}
-
-@media (min-width: 1025px) {
-  .slideshow-container {
-    height: 520px !important;
+  .page-content-wrapper {
+    margin-top: 1rem;
   }
 }
