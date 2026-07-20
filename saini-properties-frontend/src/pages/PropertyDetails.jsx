@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom"; // Fixed import
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
   FaBed,
@@ -43,7 +43,7 @@ const PropertyDetails = () => {
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState(null);
 
-  // Fetch Property Data with Mock Fallback
+  // Fetch Property Data with Local Data Fallback
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
@@ -54,9 +54,7 @@ const PropertyDetails = () => {
         const response = await axios.get(`/api/properties/${id}`);
         setProperty(response.data);
       } catch (err) {
-        console.warn("API unavailable, looking up local data:", err);
-
-        // Fallback to local data matching ID
+        // Fallback to local propertiesData array matching ID
         const localMatch = propertiesData.find(
           (p) => String(p.id) === String(id)
         );
@@ -64,9 +62,7 @@ const PropertyDetails = () => {
         if (localMatch) {
           setProperty(localMatch);
         } else {
-          setError(
-            "Failed to load property details. The property may not exist."
-          );
+          setError("Failed to load property details. The property may not exist.");
         }
       } finally {
         setLoading(false);
@@ -78,7 +74,7 @@ const PropertyDetails = () => {
     }
   }, [id]);
 
-  // Image Slider Logic
+  // Handle Images Array
   const propertyImages =
     property?.images?.length > 0
       ? property.images
@@ -86,6 +82,7 @@ const PropertyDetails = () => {
       ? [property.image]
       : ["/placeholder-property.jpg"];
 
+  // Image Navigation Controls
   const handlePrevSlide = useCallback(() => {
     setActiveImage((prevIndex) =>
       prevIndex === 0 ? propertyImages.length - 1 : prevIndex - 1
@@ -98,7 +95,7 @@ const PropertyDetails = () => {
     );
   }, [propertyImages.length]);
 
-  // Auto-play slideshow timer
+  // Slideshow Auto-play Timer
   useEffect(() => {
     if (!isAutoPlaying || propertyImages.length <= 1) return;
     const timer = setInterval(() => {
@@ -108,7 +105,7 @@ const PropertyDetails = () => {
     return () => clearInterval(timer);
   }, [isAutoPlaying, handleNextSlide, propertyImages.length]);
 
-  // Touch handlers for mobile swiping
+  // Touch Gestures for Mobile
   const minSwipeDistance = 50;
 
   const onTouchStart = (e) => {
@@ -133,7 +130,7 @@ const PropertyDetails = () => {
     }
   };
 
-  // Keyboard Navigation for Slider
+  // Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") handlePrevSlide();
@@ -143,7 +140,7 @@ const PropertyDetails = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevSlide, handleNextSlide]);
 
-  // Handle Contact Inquiry Submission
+  // Submit Inquiry Form
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
     setFormSubmitting(true);
@@ -158,16 +155,15 @@ const PropertyDetails = () => {
         "Your message has been sent successfully! We will contact you shortly."
       );
     } catch (err) {
-      console.error("Error submitting inquiry:", err);
       setFormSuccess(
-        "Inquiry noted! (Demo mode: Backend connection unavailable)."
+        "Inquiry submitted! (Demo mode: Backend connection unavailable)."
       );
     } finally {
       setFormSubmitting(false);
     }
   };
 
-  // Share Handler
+  // Share Property Action
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -183,7 +179,7 @@ const PropertyDetails = () => {
         <div className="page-content-wrapper flex flex-col items-center justify-center py-20">
           <FaSpinner className="animate-spin text-4xl mb-4 text-[var(--color-primary)]" />
           <p className="text-lg font-medium text-[var(--color-muted)]">
-            Fetching property details...
+            Loading property details...
           </p>
         </div>
         <Footer />
@@ -202,8 +198,7 @@ const PropertyDetails = () => {
               Property Not Found
             </h2>
             <p className="text-[var(--color-muted)] mb-6">
-              {error ||
-                "The property you are looking for does not exist or has been removed."}
+              {error || "The property you are looking for does not exist."}
             </p>
           </div>
         </div>
@@ -212,9 +207,9 @@ const PropertyDetails = () => {
     );
   }
 
-  // Normalize Property Properties Across Different Data Sources
-  const name = property.title || property.name || "Luxury Residence";
-  const location = property.location || "Location upon request";
+  // Extract property attributes
+  const name = property.name || property.title || "Luxury Property";
+  const location = property.location || "Location unavailable";
   const rawPrice = property.price || "N/A";
   const formattedPrice =
     typeof rawPrice === "number"
@@ -223,44 +218,38 @@ const PropertyDetails = () => {
       ? rawPrice
       : `₹${rawPrice}`;
 
-  const badge = property.badge || property.type || "Featured";
-  const beds = property.beds ?? property.bedrooms ?? "N/A";
-  const baths = property.baths ?? property.bathrooms ?? "N/A";
+  const badge = property.badge;
+  const beds = property.beds ?? "N/A";
+  const baths = property.baths ?? "N/A";
   const area = property.area || "N/A";
-  const description =
-    property.description || "No description available for this property.";
-
-  const amenities =
-    property.preInstalledItems || property.amenities || [];
-
-  const nearby = property.nearby || {
-    airport: property.distanceInfo || "10 - 15 mins away",
-    railway: property.distanceInfo || "10 - 15 mins away",
-  };
+  const description = property.description || "No description available.";
+  const preInstalledItems = property.preInstalledItems || property.amenities || [];
+  const locationDescription = property.locationDescription;
+  const distanceInfo = property.distanceInfo || "10 - 15 minutes away";
 
   return (
     <div className="homepage-wrapper">
       <Navbar />
 
       <main className="page-content-wrapper">
-        {/* Right Positioned Standard Share Button Bar */}
+        {/* Right-Positioned Standard Share Button */}
         <div className="flex justify-end items-center mb-4">
           <button
             onClick={handleShare}
-            className="pd-card flex items-center gap-2 px-4 py-2.5 shadow-sm text-[var(--color-ink)] hover:text-[var(--color-primary)] transition relative font-medium text-sm border border-[var(--color-border)] rounded-md cursor-pointer"
+            className="pd-card flex items-center gap-2 px-4 py-2 shadow-sm text-[var(--color-ink)] hover:text-[var(--color-primary)] transition relative font-medium text-sm border border-[var(--color-border)] rounded-md cursor-pointer"
             title="Share Property"
           >
-            <FaShareAlt className="text-base" />
+            <FaShareAlt className="text-sm" />
             <span>Share</span>
             {copied && (
-              <span className="absolute -top-10 right-0 bg-[var(--color-ink)] text-[var(--color-surface)] text-xs px-2.5 py-1 rounded-md shadow-md whitespace-nowrap">
+              <span className="absolute -top-9 right-0 bg-[var(--color-ink)] text-[var(--color-surface)] text-xs px-2.5 py-1 rounded-md shadow-md whitespace-nowrap z-30">
                 Link Copied!
               </span>
             )}
           </button>
         </div>
 
-        {/* Title & Price Header Card */}
+        {/* Title & Price Card Header */}
         <div className="pd-card mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -289,14 +278,14 @@ const PropertyDetails = () => {
           </div>
         </div>
 
-        {/* Image Slideshow Section */}
+        {/* Interactive Image Gallery */}
         <div
-          className="mb-10 group select-none"
+          className="mb-8 group select-none"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
           <div
-            className="relative h-64 sm:h-[450px] md:h-[520px] w-full rounded-2xl overflow-hidden shadow-xl bg-black/90 border border-[var(--color-border)]"
+            className="relative h-64 sm:h-[450px] md:h-[500px] w-full rounded-2xl overflow-hidden shadow-xl bg-black/90 border border-[var(--color-border)]"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
@@ -311,10 +300,10 @@ const PropertyDetails = () => {
                 >
                   <img
                     src={img}
-                    alt={`${name} - Photo ${index + 1}`}
+                    alt={`${name} - View ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
                 </div>
               ))}
             </div>
@@ -324,7 +313,7 @@ const PropertyDetails = () => {
                 <button
                   onClick={handlePrevSlide}
                   aria-label="Previous photo"
-                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all duration-200 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:scale-110 active:scale-95"
+                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:scale-110 active:scale-95"
                 >
                   <FaChevronLeft className="text-base sm:text-lg" />
                 </button>
@@ -332,24 +321,26 @@ const PropertyDetails = () => {
                 <button
                   onClick={handleNextSlide}
                   aria-label="Next photo"
-                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all duration-200 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:scale-110 active:scale-95"
+                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:scale-110 active:scale-95"
                 >
                   <FaChevronRight className="text-base sm:text-lg" />
                 </button>
               </>
             )}
 
-            <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-medium border border-white/10 shadow-sm flex items-center gap-1.5">
+            {/* Counter Badge */}
+            <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-medium border border-white/10 shadow-sm flex items-center gap-1">
               <span>{activeImage + 1}</span> / <span>{propertyImages.length}</span>
             </div>
 
+            {/* Pagination Dots */}
             {propertyImages.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                 {propertyImages.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-                    aria-label={`Go to slide ${idx + 1}`}
+                    aria-label={`Go to image ${idx + 1}`}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       activeImage === idx
                         ? "w-6 bg-[var(--color-primary)]"
@@ -385,11 +376,11 @@ const PropertyDetails = () => {
           )}
         </div>
 
-        {/* Main Content Layout */}
+        {/* Content Section Container Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left / Main Details Column */}
+          {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Key Specs Row */}
+            {/* Key Specs Card */}
             <div className="pd-card grid grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center">
                 <FaBed className="text-2xl text-[var(--color-primary)] mb-2" />
@@ -412,7 +403,7 @@ const PropertyDetails = () => {
               <div className="flex flex-col items-center">
                 <FaRulerCombined className="text-2xl text-[var(--color-primary)] mb-2" />
                 <span className="text-xs text-[var(--color-muted)] font-medium">
-                  Total Area
+                  Area
                 </span>
                 <span className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
                   {area}
@@ -420,34 +411,34 @@ const PropertyDetails = () => {
               </div>
             </div>
 
-            {/* Description Section */}
+            {/* Description & Location Description Container */}
             <div className="pd-card p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[var(--color-ink)] mb-4">
-                Property Description
+                Description
               </h2>
-              <p className="text-[var(--color-muted)] leading-relaxed whitespace-pre-line text-sm sm:text-base">
+              <p className="text-[var(--color-muted)] leading-relaxed text-sm sm:text-base">
                 {description}
               </p>
-              {property.locationDescription && (
+              {locationDescription && (
                 <p className="text-[var(--color-muted)] leading-relaxed text-sm sm:text-base mt-4 pt-4 border-t border-[var(--color-border)]">
-                  {property.locationDescription}
+                  {locationDescription}
                 </p>
               )}
             </div>
 
-            {/* Features & Pre-installed Items */}
-            {amenities.length > 0 && (
+            {/* Pre-installed Items Container */}
+            {preInstalledItems.length > 0 && (
               <div className="pd-card p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-[var(--color-ink)] mb-6">
-                  Features & Pre-installed Items
+                  Pre-installed Items & Features
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {amenities.map((item, idx) => (
+                  {preInstalledItems.map((item, idx) => (
                     <div
                       key={idx}
                       className="flex items-center gap-3 p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]"
                     >
-                      <FaCheckCircle className="text-emerald-500 text-lg shrink-0" />
+                      <FaCheckCircle className="text-emerald-500 text-base shrink-0" />
                       <span className="text-sm font-medium text-[var(--color-ink)]">
                         {item}
                       </span>
@@ -457,10 +448,10 @@ const PropertyDetails = () => {
               </div>
             )}
 
-            {/* Proximity & Connectivity Section */}
+            {/* Distance & Proximity Container */}
             <div className="pd-card p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[var(--color-ink)] mb-6">
-                Location & Connectivity Proximity
+                Connectivity & Distance Info
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -469,10 +460,10 @@ const PropertyDetails = () => {
                   </div>
                   <div>
                     <span className="text-xs text-[var(--color-muted)] font-medium block">
-                      Nearest Airport
+                      Airport Proximity
                     </span>
-                    <span className="text-base font-bold text-[var(--color-ink)]">
-                      {nearby.airport || "N/A"}
+                    <span className="text-sm font-bold text-[var(--color-ink)]">
+                      {distanceInfo}
                     </span>
                   </div>
                 </div>
@@ -483,10 +474,10 @@ const PropertyDetails = () => {
                   </div>
                   <div>
                     <span className="text-xs text-[var(--color-muted)] font-medium block">
-                      Railway Station
+                      Railway Proximity
                     </span>
-                    <span className="text-base font-bold text-[var(--color-ink)]">
-                      {nearby.railway || "N/A"}
+                    <span className="text-sm font-bold text-[var(--color-ink)]">
+                      {distanceInfo}
                     </span>
                   </div>
                 </div>
@@ -497,9 +488,9 @@ const PropertyDetails = () => {
           {/* Right Column: Inquiry Form */}
           <div className="space-y-6">
             <div className="pd-card p-6 sticky top-24">
-              <h4 className="font-bold text-lg text-[var(--color-ink)] mb-4">
+              <h3 className="font-bold text-lg text-[var(--color-ink)] mb-4">
                 Inquire About Property
-              </h4>
+              </h3>
 
               {formSuccess && (
                 <div className="mb-4 p-3 rounded-xl bg-green-500/10 text-green-600 text-xs leading-relaxed border border-green-500/20">
@@ -510,7 +501,7 @@ const PropertyDetails = () => {
               <form onSubmit={handleInquirySubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-[var(--color-muted)] mb-1">
-                    Your Query / Message
+                    Your Message
                   </label>
                   <textarea
                     name="message"
@@ -526,7 +517,7 @@ const PropertyDetails = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="pd-btn-primary w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 shadow-md disabled:opacity-50 cursor-pointer"
+                  className="pd-btn-primary w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 shadow-md disabled:opacity-50 cursor-pointer text-sm"
                 >
                   {formSubmitting ? (
                     <>
