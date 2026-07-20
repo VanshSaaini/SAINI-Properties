@@ -19,7 +19,7 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { propertiesData } from "../data/propertiesData";
-import API from "../api"; // Custom Axios instance pointing to backend
+import API from "../services/authService"; // Custom Axios instance pointing to backend
 import "./PropertyDetails.css";
 
 const PropertyDetails = () => {
@@ -163,9 +163,12 @@ const PropertyDetails = () => {
     setFormSuccess(null);
 
     try {
-      await API.post("/api/inquiries", {
-        propertyId: id,
-        message: message,
+      await API.post("/api/contact-query", {
+          propertyId: id,
+          propertyName: property.name,
+          userEmail: "", // collect from user if needed
+          targetEmail: "",
+          message,
       });
       setFormSuccess(
         "Your message has been sent successfully! We will contact you shortly."
