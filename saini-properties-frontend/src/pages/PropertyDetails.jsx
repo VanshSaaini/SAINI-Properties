@@ -19,7 +19,7 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { propertiesData } from "../data/propertiesData";
-import API from "../api"; // Adjust import path according to your folder structure
+import API from "../api"; // Custom Axios instance pointing to backend
 import "./PropertyDetails.css";
 
 const PropertyDetails = () => {
@@ -45,42 +45,50 @@ const PropertyDetails = () => {
   const [formSuccess, setFormSuccess] = useState(null);
 
   // Fetch Property Data with Local Data Fallback
-useEffect(() => {
-  const fetchPropertyDetails = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  useEffect(() => {
+    setActiveImage(0);
+    setFormSuccess(null);
 
-      // 1. Try API Request
-      const response = await axios.get(`/api/properties/${id}`);
-      
-      // Ensure API response actually contains property data
-      if (response.data && (response.data.id || response.data.name || response.data.title)) {
-        setProperty(response.data);
-        return;
-      }
-      
-      throw new Error("API returned empty property payload");
-    } catch (err) {
-      // 2. Fallback to local propertiesData array matching ID
-      const localMatch = propertiesData.find(
-        (p) => String(p.id) === String(id)
-      );
+    const fetchPropertyDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      if (localMatch) {
-        setProperty(localMatch);
-      } else {
-        setError("Failed to load property details. The property may not exist.");
+        // 1. Try API Request
+        const response = await API.get(`/api/properties/${id}`);
+
+        // Ensure API response actually contains property data
+        if (
+          response.data &&
+          (response.data.id || response.data.name || response.data.title)
+        ) {
+          setProperty(response.data);
+          return;
+        }
+
+        throw new Error("API returned empty property payload");
+      } catch (err) {
+        // 2. Fallback to local propertiesData array matching ID
+        const localMatch = propertiesData.find(
+          (p) => String(p.id) === String(id)
+        );
+
+        if (localMatch) {
+          setProperty(localMatch);
+        } else {
+          setError(
+            "Failed to load property details. The property may not exist."
+          );
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
+    };
+
+    if (id) {
+      fetchPropertyDetails();
     }
-  };
-
-  if (id) {
-    fetchPropertyDetails();
-  }
-}, [id]);
+  }, [id]);
 
   // Handle Images Array
   const propertyImages =
@@ -148,15 +156,13 @@ useEffect(() => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevSlide, handleNextSlide]);
 
-
-// Submit Inquiry Form
+  // Submit Inquiry Form
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
     setFormSubmitting(true);
     setFormSuccess(null);
 
     try {
-      // Uses the API instance imported at the top of the file
       await API.post("/api/inquiries", {
         propertyId: id,
         message: message,
@@ -165,7 +171,7 @@ useEffect(() => {
         "Your message has been sent successfully! We will contact you shortly."
       );
     } catch (err) {
-      console.warn("Inquiry error or offline mode:", err);
+      console.warn("Backend error or connection missing:", err);
       setFormSuccess(
         "Inquiry submitted! (Demo mode: Backend connection unavailable)."
       );
@@ -218,7 +224,7 @@ useEffect(() => {
     );
   }
 
-  // Extract property attributes
+  // Extract property attributes safely
   const name = property.name || property.title || "Luxury Property";
   const location = property.location || "Location unavailable";
   const rawPrice = property.price || "N/A";
@@ -234,7 +240,13 @@ useEffect(() => {
   const baths = property.baths ?? "N/A";
   const area = property.area || "N/A";
   const description = property.description || "No description available.";
-  const preInstalledItems = property.preInstalledItems || property.amenities || [];
+  
+  const preInstalledItems = Array.isArray(property.preInstalledItems)
+    ? property.preInstalledItems
+    : Array.isArray(property.amenities)
+    ? property.amenities
+    : [];
+
   const locationDescription = property.locationDescription;
   const distanceInfo = property.distanceInfo || "10 - 15 minutes away";
 
@@ -422,7 +434,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Description & Location Description Container */}
+            {/* Description Container */}
             <div className="pd-card p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[var(--color-ink)] mb-4">
                 Description
