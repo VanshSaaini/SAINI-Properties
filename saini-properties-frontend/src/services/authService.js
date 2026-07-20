@@ -1,10 +1,12 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:8080/auth" // Must strictly align with your @RequestMapping\
-    headers: {
+  baseURL: import.meta.env.VITE_API_BASE_URL 
+    ? `${import.meta.env.VITE_API_BASE_URL}/auth` 
+    : "http://localhost:8080/auth", // Fixed: Added comma and removed trailing backslash
+  headers: {
     'Content-Type': 'application/json',
-    'bypass-tunnel-reminder': 'true' // <-- Add this line here
+    'bypass-tunnel-reminder': 'true'
   }
 });
 
