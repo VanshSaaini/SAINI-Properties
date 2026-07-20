@@ -2,28 +2,16 @@
    Property Details Page Stylesheet
    ========================================================================== */
 
-/* Root CSS Variables for Consistent Application Theme */
-:root {
-  --primary-blue: #2563eb;
-  --primary-blue-hover: #1d4ed8;
-  --accent-emerald: #059669;
-  --accent-emerald-hover: #047857;
-  --bg-light: #f8fafc;
-  --bg-dark: #0f172a;
-  --card-light: #ffffff;
-  --card-dark: #1e293b;
-  --border-light: #e2e8f0;
-  --border-dark: #334155;
-  --text-primary-light: #0f172a;
-  --text-primary-dark: #f8fafc;
-  --text-muted-light: #64748b;
-  --text-muted-dark: #94a3b8;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Page Wrapper Aligned with Home Page Styles */
+.homepage-wrapper {
+  min-height: 100vh;
+  background-color: var(--bg-light, #f8fafc);
+  color: var(--text-primary-light, #0f172a);
+}
+
+.dark .homepage-wrapper {
+  background-color: var(--bg-dark, #0f172a);
+  color: var(--text-primary-dark, #f8fafc);
 }
 
 /* Glassmorphism Backdrop Effects */
@@ -49,33 +37,14 @@
   scrollbar-width: none;
 }
 
-/* Thumbnail Selection & Hover Animations */
-.thumbnail-btn {
-  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-}
-
-.thumbnail-btn:hover {
-  transform: translateY(-2px);
-}
-
-.thumbnail-btn.active {
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 12px rgba(37, 99, 235, 0.35);
-}
-
 /* Custom Form Input Focus Effects */
 .property-input {
-  transition: var(--transition-smooth);
+  transition: var(--transition-smooth, all 0.3s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .property-input:focus {
-  border-color: var(--primary-blue);
+  border-color: var(--primary-blue, #2563eb);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-/* Smooth Slide Transitions for Main Image Container */
-.slideshow-image {
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Responsive Custom Adjustments */
