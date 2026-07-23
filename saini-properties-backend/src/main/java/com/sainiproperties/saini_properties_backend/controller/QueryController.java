@@ -27,7 +27,7 @@ import java.util.Map;
 public class QueryController {
 
     private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
-    private static final String ADMIN_EMAIL = "vs7579030670@gmail.com";
+    private static final String ADMIN_EMAIL = "saini40vansh@gmail.com";
 
     @Value("${brevo.api.key}")
     private String brevoApiKey;
