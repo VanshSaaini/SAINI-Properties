@@ -39,8 +39,9 @@ const PropertyDetails = () => {
 
   // Inquiry Form State
   const [message, setMessage] = useState(
-    "Hi, I am interested in this property. Please contact me with more details."
+    "Hi, I am interested in this property. Please contact me with more details.",
   );
+  const [userEmail, setUserEmail] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState(null);
 
@@ -70,14 +71,14 @@ const PropertyDetails = () => {
       } catch (err) {
         // 2. Fallback to local propertiesData array matching ID
         const localMatch = propertiesData.find(
-          (p) => String(p.id) === String(id)
+          (p) => String(p.id) === String(id),
         );
 
         if (localMatch) {
           setProperty(localMatch);
         } else {
           setError(
-            "Failed to load property details. The property may not exist."
+            "Failed to load property details. The property may not exist.",
           );
         }
       } finally {
@@ -95,19 +96,19 @@ const PropertyDetails = () => {
     property?.images?.length > 0
       ? property.images
       : property?.image
-      ? [property.image]
-      : ["/placeholder-property.jpg"];
+        ? [property.image]
+        : ["/placeholder-property.jpg"];
 
   // Image Navigation Controls
   const handlePrevSlide = useCallback(() => {
     setActiveImage((prevIndex) =>
-      prevIndex === 0 ? propertyImages.length - 1 : prevIndex - 1
+      prevIndex === 0 ? propertyImages.length - 1 : prevIndex - 1,
     );
   }, [propertyImages.length]);
 
   const handleNextSlide = useCallback(() => {
     setActiveImage((prevIndex) =>
-      prevIndex === propertyImages.length - 1 ? 0 : prevIndex + 1
+      prevIndex === propertyImages.length - 1 ? 0 : prevIndex + 1,
     );
   }, [propertyImages.length]);
 
@@ -159,25 +160,37 @@ const PropertyDetails = () => {
   // Submit Inquiry Form
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
+
     setFormSubmitting(true);
     setFormSuccess(null);
 
     try {
       await API.post("/api/contact-query", {
-          propertyId: id,
-          propertyName: property.name,
-          userEmail: "", // collect from user if needed
-          targetEmail: "",
-          message,
+        propertyId: property.id,
+        propertyName: property.name,
+        userEmail: userEmail.trim(),
+        message: message.trim(),
       });
+
       setFormSuccess(
-        "Your message has been sent successfully! We will contact you shortly."
+        "Your message has been sent successfully! We will contact you shortly.",
       );
+
+      setMessage(
+        "Hi, I am interested in this property. Please contact me with more details.",
+      );
+
+      setUserEmail("");
     } catch (err) {
-      console.warn("Backend error or connection missing:", err);
-      setFormSuccess(
-        "Inquiry submitted! (Demo mode: Backend connection unavailable)."
-      );
+      console.error(err);
+
+      if (err.response) {
+        setFormSuccess(err.response.data);
+      } else {
+        setFormSuccess(
+          "Unable to connect to the server. Please try again later.",
+        );
+      }
     } finally {
       setFormSubmitting(false);
     }
@@ -235,20 +248,20 @@ const PropertyDetails = () => {
     typeof rawPrice === "number"
       ? `₹${rawPrice.toLocaleString("en-IN")}`
       : rawPrice.startsWith("₹")
-      ? rawPrice
-      : `₹${rawPrice}`;
+        ? rawPrice
+        : `₹${rawPrice}`;
 
   const badge = property.badge;
   const beds = property.beds ?? "N/A";
   const baths = property.baths ?? "N/A";
   const area = property.area || "N/A";
   const description = property.description || "No description available.";
-  
+
   const preInstalledItems = Array.isArray(property.preInstalledItems)
     ? property.preInstalledItems
     : Array.isArray(property.amenities)
-    ? property.amenities
-    : [];
+      ? property.amenities
+      : [];
 
   const locationDescription = property.locationDescription;
   const distanceInfo = property.distanceInfo || "10 - 15 minutes away";
@@ -356,7 +369,8 @@ const PropertyDetails = () => {
 
             {/* Counter Badge */}
             <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-medium border border-white/10 shadow-sm flex items-center gap-1">
-              <span>{activeImage + 1}</span> / <span>{propertyImages.length}</span>
+              <span>{activeImage + 1}</span> /{" "}
+              <span>{propertyImages.length}</span>
             </div>
 
             {/* Pagination Dots */}
@@ -525,19 +539,36 @@ const PropertyDetails = () => {
               )}
 
               <form onSubmit={handleInquirySubmit} className="space-y-4">
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--color-muted)] mb-1">
+                    Your Email
+                  </label>
+
+                  <input
+                    type="email"
+                    required
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="property-input w-full p-3 rounded-xl text-sm"
+                  />
+                </div>
+
+                {/* Message */}
                 <div>
                   <label className="block text-xs font-semibold text-[var(--color-muted)] mb-1">
                     Your Message
                   </label>
+
                   <textarea
-                    name="message"
                     rows="5"
                     required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Write your query or message here..."
                     className="property-input w-full p-3 rounded-xl text-sm resize-none"
-                  ></textarea>
+                  />
                 </div>
 
                 <button
