@@ -1,19 +1,18 @@
-// src/api.js or src/services/api.js
 import axios from "axios";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
   headers: {
-    'Content-Type': 'application/json',
-    'bypass-tunnel-reminder': 'true'
-  }
+    "Content-Type": "application/json",
+  },
+  withCredentials: false,
 });
 
-// Auth endpoints
+// Authentication
 export const register = (user) => API.post("/auth/register", user);
 export const login = (credentials) => API.post("/auth/login", credentials);
 
-// Inquiries endpoint
-export const sendInquiry = (inquiryData) => API.post("/api/inquiries", inquiryData);
+// Inquiry
+export const sendInquiry = (data) => API.post("/api/inquiries", data);
 
 export default API;

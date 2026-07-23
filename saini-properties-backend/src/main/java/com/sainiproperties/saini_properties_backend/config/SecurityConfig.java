@@ -25,48 +25,52 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-    "/auth/**",
-                "/api/contact-query",
-                "/api/properties/**"
-            ).permitAll()
-            .anyRequest().authenticated()
-        );
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/**",
+                                "/api/contact-query",
+                                "/api/inquiries",
+                                "/api/properties/**"
+                        ).permitAll()
+                        .anyRequest().authenticated());
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 1. Allow standard origins and pattern matching for Vercel preview URLs
         configuration.setAllowedOriginPatterns(List.of(
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "https://*.vercel.app" // Allows all Vercel deployments automatically
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://*.vercel.app"
         ));
 
-        // 2. Allowed Methods
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // 3. Allowed Headers
-        configuration.setAllowedHeaders(List.of(
-            "Authorization", 
-            "Content-Type", 
-            "Accept", 
-            "X-Requested-With", 
-            "bypass-tunnel-reminder"
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
         ));
 
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(List.of("*"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        configuration.setExposedHeaders(List.of("Authorization"));
+
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }
