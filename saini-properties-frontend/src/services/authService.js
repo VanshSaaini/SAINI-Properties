@@ -13,6 +13,6 @@ export const register = (user) => API.post("/auth/register", user);
 export const login = (credentials) => API.post("/auth/login", credentials);
 
 // Inquiry
-export const sendInquiry = (data) => API.post("/api/inquiries", data);
+export const sendInquiry = (data) => API.post("/api/contact-query", data);
 
 export default API;

@@ -1,7 +1,6 @@
 package com.sainiproperties.saini_properties_backend.controller;
 
 import com.sainiproperties.saini_properties_backend.DTO.QueryRequest;
-
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -17,32 +16,42 @@ public class QueryController {
     private JavaMailSender mailSender;
 
     @PostMapping("/contact-query")
-    public ResponseEntity<String> sendPropertyQuery(@RequestBody QueryRequest request) {
+    public ResponseEntity<String> sendPropertyQuery(
+            @RequestBody QueryRequest request) {
 
         try {
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
             MimeMessageHelper helper =
-                    new MimeMessageHelper(mimeMessage, true);
+                    new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setFrom("vs7579030670@gmail.com");
-
             helper.setTo("vs7579030670@gmail.com");
 
-            // THIS IS THE IMPORTANT PART
             helper.setReplyTo(request.getUserEmail());
 
             helper.setSubject(
-                    "New Property Inquiry - " + request.getPropertyName()
-            );
+                    "New Property Inquiry - " + request.getPropertyName());
 
             helper.setText(
-                    "Property ID: " + request.getPropertyId()
-                    + "\n\nProperty: " + request.getPropertyName()
-                    + "\n\nUser Email: " + request.getUserEmail()
-                    + "\n\nMessage:\n"
-                    + request.getMessage()
+                    """
+                    Property ID: %d
+                    
+                    Property Name: %s
+                    
+                    Customer Email: %s
+                    
+                    Message:
+                    
+                    %s
+                    """
+                            .formatted(
+                                    request.getPropertyId(),
+                                    request.getPropertyName(),
+                                    request.getUserEmail(),
+                                    request.getMessage()
+                            )
             );
 
             mailSender.send(mimeMessage);
@@ -51,11 +60,10 @@ public class QueryController {
 
         } catch (Exception e) {
 
+            e.printStackTrace();
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getMessage());
-
+                    .body("Failed to send email: " + e.getMessage());
         }
-
     }
-
 }
