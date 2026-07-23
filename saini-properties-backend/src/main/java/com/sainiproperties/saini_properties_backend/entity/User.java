@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
-@Data                 // Generates getters, setters, toString, equals, and hashCode via Lombok
-@NoArgsConstructor    // Generates a boilerplate-free default constructor
-@AllArgsConstructor   // Generates a constructor with all arguments
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
