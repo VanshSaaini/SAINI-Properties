@@ -1,5 +1,7 @@
 package com.sainiproperties.saini_properties_backend.controller;
 
+import com.sainiproperties.saini_properties_backend.DTO.QueryRequest;
+
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
