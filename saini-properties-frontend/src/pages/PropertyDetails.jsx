@@ -165,9 +165,16 @@ const PropertyDetails = () => {
     setFormSuccess(null);
 
     try {
-      await API.post("/api/contact-query", {
+      console.log({
         propertyId: property.id,
         propertyName: property.name,
+        propertyTitle: property.title,
+        userEmail,
+        message,
+      });
+      await API.post("/api/contact-query", {
+        propertyId: property.id,
+        propertyName: property.name || property.title,
         userEmail: userEmail.trim(),
         message: message.trim(),
       });
@@ -182,14 +189,14 @@ const PropertyDetails = () => {
 
       setUserEmail("");
     } catch (err) {
-      console.error(err);
+      console.log(err.response);
+      console.log(err.response?.status);
+      console.log(err.response?.data);
 
       if (err.response) {
         setFormSuccess(err.response.data);
       } else {
-        setFormSuccess(
-          "Unable to connect to the server. Please try again later.",
-        );
+        setFormSuccess("Unable to connect.");
       }
     } finally {
       setFormSubmitting(false);

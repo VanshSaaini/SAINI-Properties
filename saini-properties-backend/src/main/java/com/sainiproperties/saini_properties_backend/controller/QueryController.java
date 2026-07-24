@@ -17,7 +17,8 @@ import java.util.Map;
 /**
  * NOTE ON EMAIL DELIVERY:
  * Render's free web-service tier blocks outbound traffic on SMTP ports
- * (25, 465, 587) as of Sept 2025. Since Gmail SMTP uses port 587, JavaMailSender
+ * (25, 465, 587) as of Sept 2025. Since Gmail SMTP uses port 587,
+ * JavaMailSender
  * would hang/fail with a connection error in production even though it works
  * fine locally. To avoid that, this sends email over plain HTTPS using Brevo's
  * transactional email API instead of SMTP.
@@ -64,8 +65,7 @@ public class QueryController {
                     request.getPropertyId(),
                     request.getPropertyName(),
                     userEmail,
-                    request.getMessage()
-            );
+                    request.getMessage());
 
             Map<String, Object> sender = new HashMap<>();
             sender.put("name", "Saini Properties");
@@ -92,12 +92,13 @@ public class QueryController {
 
             return ResponseEntity.ok("Query sent successfully.");
 
-        } catch (Exception e) {
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
 
-            e.printStackTrace();
+            System.out.println("Brevo Status: " + e.getStatusCode());
+            System.out.println("Brevo Response: " + e.getResponseBodyAsString());
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to send email: " + e.getMessage());
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(e.getResponseBodyAsString());
         }
     }
 }
